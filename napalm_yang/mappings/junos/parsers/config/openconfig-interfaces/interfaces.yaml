@@ -38,6 +38,7 @@ interfaces:
                           xe: ethernetCsmacd
                           et: ethernetCsmacd
                           irb: ethernetCsmacd
+                          em: ethernetCsmacd
                           me: ethernetCsmacd
                           vlan: ethernetCsmacd
                           lo: softwareLoopback
