@@ -94,6 +94,15 @@ def _resolve_path(obj, path):
             return _flatten_list(obj, path, current[1:])
 
 
+def _set_pdb_trace():
+    try:
+        import ipdb
+        ipdb.set_trace()
+    except ImportError:
+        import pdb
+        pdb.set_trace()
+
+
 class BaseParser(object):
 
     def __init__(self, keys, extra_vars):
@@ -123,8 +132,7 @@ class BaseParser(object):
         for m in mapping:
             pdb = m.get("pdb", {})
             if pdb:
-                import pdb
-                pdb.set_trace()
+                _set_pdb_trace()
                 continue
             # parent will change as the tree is processed so we save it
             # so we can restore it
@@ -144,8 +152,7 @@ class BaseParser(object):
         for m in mapping:
             pdb = m.get("pdb", {})
             if pdb:
-                import pdb
-                pdb.set_trace()
+                _set_pdb_trace()
                 continue
             data = self.resolve_path(bookmarks, m.get("from", "parent"))
             result = self._parse_leaf_default(attribute, m, data)
@@ -160,18 +167,19 @@ class BaseParser(object):
     def parse_container(self, attribute, mapping, bookmarks):
         mapping = helpers.resolve_rule(mapping, attribute, self.keys, self.extra_vars, None,
                                        process_all=False)
+        extra_vars = {}
         for m in mapping:
             pdb = m.get("pdb", {})
             if pdb:
-                import pdb
-                pdb.set_trace()
+                _set_pdb_trace()
                 continue
             # parent will change as the tree is processed so we save it
             # so we can restore it
             parent = bookmarks["parent"]
             data = self.resolve_path(bookmarks, m.get("from", "parent"))
-            result, extra_vars = self._parse_container_default(attribute, m, data)
-            if result or extra_vars:
+            result, e = self._parse_container_default(attribute, m, data)
+            extra_vars.update(e)
+            if result:
                 break
 
             # we restore the parent
